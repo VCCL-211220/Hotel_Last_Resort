@@ -1,0 +1,261 @@
+{# templates/guests.html #}
+{% extends "base.html" %}
+
+{% block title %}Guests – Last Resort Hotel{% endblock %}
+
+{% block head_extra %}
+<style>
+  .page-content {
+    background: #111;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 40px 0;
+  }
+
+  .guests-wrapper {
+    background: #f5f5f7;
+    border-radius: 16px;
+    max-width: 1100px;
+    width: 100%;
+    padding: 24px 32px 32px;
+    box-sizing: border-box;
+  }
+
+  .guests-header {
+    font-size: 26px;
+    font-weight: 700;
+    margin-bottom: 16px;
+  }
+
+  /* top controls */
+  .guests-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px 16px;
+    align-items: flex-end;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    font-size: 13px;
+  }
+
+  .guests-search-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+    flex: 1;
+  }
+
+  .guests-search-input {
+    flex: 1;
+    min-width: 220px;
+    padding: 6px 10px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    font-size: 13px;
+  }
+
+  .guests-filter-btn {
+    padding: 8px 16px;
+    border-radius: 999px;
+    border: none;
+    background: #000;
+    color: #fff;
+    font-size: 13px;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+
+  /* add guest form (compact) */
+  .guests-add-card {
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 12px 14px;
+    border: 1px solid #e0e0e0;
+    margin-bottom: 16px;
+    font-size: 13px;
+  }
+
+  .guests-add-title {
+    font-weight: 600;
+    margin-bottom: 6px;
+  }
+
+  .guests-add-form {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 10px;
+    align-items: center;
+  }
+
+  .guests-add-form input,
+  .guests-add-form select {
+    padding: 5px 8px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    font-size: 13px;
+  }
+
+  .guests-add-form input[type="text"],
+  .guests-add-form input[type="email"] {
+    min-width: 170px;
+  }
+
+  .guests-add-btn {
+    padding: 7px 14px;
+    border-radius: 999px;
+    border: none;
+    background: #000;
+    color: #fff;
+    cursor: pointer;
+    font-size: 13px;
+    white-space: nowrap;
+  }
+
+  /* table */
+  .guests-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    background: #ffffff;
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  .guests-table th,
+  .guests-table td {
+    padding: 8px 10px;
+    border-bottom: 1px solid #ddd;
+    text-align: left;
+  }
+
+  .guests-table th {
+    background: #eeeeee;
+    font-weight: 600;
+  }
+
+  .guests-table tr:last-child td {
+    border-bottom: none;
+  }
+
+  .guests-small {
+    color: #666;
+    font-size: 12px;
+  }
+
+  .no-results {
+    margin-top: 10px;
+    text-align: center;
+    font-size: 13px;
+    color: #666;
+  }
+
+  @media (max-width: 800px) {
+    .guests-wrapper {
+      padding: 16px 16px 24px;
+    }
+    .guests-controls {
+      flex-direction: column;
+      align-items: stretch;
+    }
+    .guests-search-group {
+      width: 100%;
+    }
+    .guests-add-form {
+      flex-direction: column;
+      align-items: stretch;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="guests-wrapper">
+  <h1 class="guests-header">Guests</h1>
+
+  <!-- Search + filters -->
+  <form method="get" class="guests-controls">
+    <div class="guests-search-group">
+      <input
+        type="text"
+        name="search"
+        class="guests-search-input"
+        placeholder="Search by guest name or email"
+        value="{{ search or '' }}"
+      >
+      <button type="submit" class="guests-filter-btn">Search</button>
+    </div>
+
+    <div>
+      <span class="guests-small">
+        Showing {{ guests|length }} guest{{ guests|length != 1 and 's' or '' }}
+      </span>
+    </div>
+  </form>
+
+  <!-- Add new guest -->
+  <div class="guests-add-card">
+    <div class="guests-add-title">Add New Guest</div>
+    <form method="post" action="{{ url_for('add_guest') }}" class="guests-add-form">
+      <input type="text" name="name" placeholder="Full name" required>
+      <input type="email" name="email" placeholder="Email">
+      <input type="text" name="phone" placeholder="Phone">
+      <select name="gender">
+        <option value="">Gender (optional)</option>
+        <option value="Female">Female</option>
+        <option value="Male">Male</option>
+        <option value="Other">Other</option>
+      </select>
+      <button type="submit" class="guests-add-btn">Save Guest</button>
+    </form>
+  </div>
+
+  <!-- Guests table -->
+  <table class="guests-table">
+    <thead>
+      <tr>
+        <th>Guest</th>
+        <th>Contact</th>
+        <th>Total Stays</th>
+        <th>Last Stay</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for g in guests %}
+      <tr>
+        <td>
+          <div>{{ g["name"] }}</div>
+          {% if g["gender"] %}
+            <div class="guests-small">{{ g["gender"] }}</div>
+          {% endif %}
+        </td>
+        <td>
+          {% if g["email"] %}
+            <div>{{ g["email"] }}</div>
+          {% endif %}
+          {% if g["phone"] %}
+            <div class="guests-small">{{ g["phone"] }}</div>
+          {% endif %}
+        </td>
+        <td>
+          {{ g["totalReservations"] or 0 }}
+        </td>
+        <td>
+          {% if g["lastEndDate"] %}
+            {{ g["lastEndDate"] }}
+          {% else %}
+            <span class="guests-small">No stays yet</span>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  {% if not guests %}
+    <p class="no-results">No guests found.</p>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,282 @@
+{% extends "base.html" %}
+
+{% block title %}Rooms Status – Last Resort Hotel{% endblock %}
+
+{% block head_extra %}
+<style>
+  .page-content {
+    background: #111;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 40px 0;
+  }
+
+  .rooms-wrapper {
+    background: #f5f5f7;
+    border-radius: 16px;
+    max-width: 1100px;
+    width: 100%;
+    padding: 24px 32px 32px;
+    box-sizing: border-box;
+  }
+
+  .rooms-header {
+    font-size: 26px;
+    font-weight: 700;
+    margin-bottom: 16px;
+  }
+
+  /* Filter bar */
+  .rooms-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px 16px;
+    align-items: flex-end;
+    margin-bottom: 20px;
+    font-size: 13px;
+  }
+
+  .form-row {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .form-row label {
+    font-weight: 500;
+  }
+
+  .rooms-select,
+  .rooms-input {
+    padding: 6px 10px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    font-size: 13px;
+    min-width: 140px;
+  }
+
+  .rooms-input {
+    min-width: 220px;
+  }
+
+  .rooms-button {
+    padding: 8px 16px;
+    border-radius: 999px;
+    border: none;
+    background: #000;
+    color: #fff;
+    font-size: 13px;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+
+  /* Table */
+  .rooms-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    background: #ffffff;
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 20px;
+  }
+
+  .rooms-table th,
+  .rooms-table td {
+    padding: 8px 10px;
+    border-bottom: 1px solid #ddd;
+    text-align: left;
+  }
+
+  .rooms-table th {
+    background: #eeeeee;
+    font-weight: 600;
+  }
+
+  .rooms-table tr:last-child td {
+    border-bottom: none;
+  }
+
+  .no-results {
+    margin-top: 8px;
+    text-align: center;
+    font-size: 13px;
+    color: #666;
+  }
+
+  /* Quick edit card */
+  .rooms-edit-card {
+    margin-top: 24px;
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 16px 18px 18px;
+    box-sizing: border-box;
+    border: 1px solid #e0e0e0;
+  }
+
+  .rooms-edit-title {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 10px;
+  }
+
+  .rooms-edit-subtitle {
+    font-size: 12px;
+    color: #666;
+    margin-bottom: 14px;
+  }
+
+  .rooms-edit-form {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px 16px;
+    align-items: flex-end;
+    font-size: 13px;
+  }
+
+  .rooms-edit-form .rooms-select,
+  .rooms-edit-form .rooms-input {
+    min-width: 160px;
+  }
+
+  .rooms-save-btn {
+    padding: 8px 16px;
+    border-radius: 999px;
+    border: none;
+    background: #000;
+    color: #fff;
+    font-size: 13px;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+
+  @media (max-width: 800px) {
+    .rooms-wrapper {
+      padding: 16px 16px 24px;
+    }
+    .rooms-filters,
+    .rooms-edit-form {
+      flex-direction: column;
+      align-items: stretch;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="rooms-wrapper">
+
+  <h1 class="rooms-header">Rooms Status</h1>
+
+  <!-- FILTERS -->
+  <form method="get" class="rooms-filters">
+    <div class="form-row">
+      <label for="status">Status</label>
+      <select id="status" name="status" class="rooms-select">
+        <option value="">All</option>
+        {% for s in unique_statuses %}
+          <option value="{{ s }}" {% if status == s %}selected{% endif %}>{{ s }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="form-row">
+      <label for="type">Type</label>
+      <select id="type" name="type" class="rooms-select">
+        <option value="">All</option>
+        {% for t in unique_types %}
+          <option value="{{ t }}" {% if room_type == t %}selected{% endif %}>{{ t }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="form-row">
+      <label for="wing">Wing</label>
+      <select id="wing" name="wing" class="rooms-select">
+        <option value="">All</option>
+        {% for w in unique_wings %}
+          <option value="{{ w }}" {% if wing == w %}selected{% endif %}>{{ w }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="form-row" style="flex: 1; min-width: 200px;">
+      <label for="search">Search</label>
+      <input id="search"
+             type="text"
+             name="search"
+             placeholder="Search room number"
+             class="rooms-input"
+             value="{{ search or '' }}">
+    </div>
+
+    <button type="submit" class="rooms-button">Apply Filters</button>
+  </form>
+
+  <!-- TABLE -->
+  <table class="rooms-table">
+    <thead>
+      <tr>
+        <th>Room Number</th>
+        <th>Type</th>
+        <th>Status</th>
+        <th>Wing</th>
+        <th>Room Status</th>
+        <th>Housekeeping</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for room in rooms %}
+      <tr>
+        <td>{{ room["roomNumber"] }}</td>
+        <td>{{ room["roomType"] }}</td>
+        <td>{{ room["status"] }}</td>
+        <td>{{ room["wing"] }}</td>
+        <td>{{ room["roomStatus"] }}</td>
+        <td>{{ room["housekeepingStatus"] }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  {% if not rooms %}
+  <p class="no-results">No rooms found matching your criteria.</p>
+  {% endif %}
+
+  <!-- QUICK EDIT PANEL -->
+  <div class="rooms-edit-card">
+    <div class="rooms-edit-title">Update Room Status</div>
+    <div class="rooms-edit-subtitle">
+      Choose a room and set a new status. Room Status and Housekeeping will update automatically based on the status.
+    </div>
+
+    <form method="post"
+          action="{{ url_for('update_room_status') }}"
+          class="rooms-edit-form">
+
+      <div class="form-row">
+        <label for="room_number">Room</label>
+        <select id="room_number" name="room_number" class="rooms-select" required>
+          {% for room in rooms %}
+          <option value="{{ room['roomNumber'] }}">{{ room["roomNumber"] }} – {{ room["roomType"] }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="form-row">
+        <label for="new_status">New Status</label>
+        <select id="new_status" name="new_status" class="rooms-select" required>
+          {% for s in unique_statuses %}
+          <option value="{{ s }}">{{ s }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <button type="submit" class="rooms-save-btn">Save Status</button>
+    </form>
+  </div>
+
+</div>
+{% endblock %}

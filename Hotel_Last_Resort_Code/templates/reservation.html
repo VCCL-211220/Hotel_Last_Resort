@@ -1,0 +1,194 @@
+{% extends "base.html" %}
+
+{% block title %}Reservations – Last Resort Hotel{% endblock %}
+
+{% block head_extra %}
+<style>
+  /* Override global layout for this page */
+  .page-content {
+    background: #111;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 40px 0;
+  }
+
+  .reservation-wrapper {
+    background: #f5f5f7;
+    border-radius: 16px;
+    max-width: 1100px;
+    width: 100%;
+    padding: 24px 32px 32px;
+    box-sizing: border-box;
+  }
+
+  .reservation-header {
+    font-size: 26px;
+    font-weight: 700;
+    margin-bottom: 16px;
+  }
+
+  /* Filter bar */
+  .reservation-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px 16px;
+    align-items: flex-end;
+    margin-bottom: 20px;
+    font-size: 13px;
+  }
+
+  .form-row {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .form-row label {
+    font-weight: 500;
+  }
+
+  .form-row select,
+  .search-input {
+    padding: 6px 10px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    font-size: 13px;
+    min-width: 140px;
+  }
+
+  .search-input {
+    min-width: 260px;
+  }
+
+  .filter-button {
+    padding: 8px 16px;
+    border-radius: 999px;
+    border: none;
+    background: #000;
+    color: #fff;
+    font-size: 13px;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+
+  /* Table */
+  .reservation-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    background: #ffffff;
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  .reservation-table th,
+  .reservation-table td {
+    padding: 8px 10px;
+    border-bottom: 1px solid #ddd;
+    text-align: left;
+  }
+
+  .reservation-table th {
+    background: #eeeeee;
+    font-weight: 600;
+  }
+
+  .reservation-table tr:last-child td {
+    border-bottom: none;
+  }
+
+  .no-results {
+    margin-top: 16px;
+    text-align: center;
+    font-size: 13px;
+    color: #666;
+  }
+
+  @media (max-width: 800px) {
+    .reservation-wrapper {
+      padding: 16px 16px 24px;
+    }
+    .reservation-filters {
+      flex-direction: column;
+      align-items: stretch;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="reservation-wrapper">
+  <h1 class="reservation-header">Reservations</h1>
+
+  <form method="get" class="reservation-filters">
+    <div class="form-row">
+      <label for="status">Status</label>
+      <select id="status" name="status">
+        <option value="">All</option>
+        {% for s in unique_statuses %}
+        <option value="{{ s }}" {% if status == s %}selected{% endif %}>{{ s }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="form-row">
+      <label for="channel">Channel</label>
+      <select id="channel" name="channel">
+        <option value="">All</option>
+        {% for c in unique_channels %}
+        <option value="{{ c }}" {% if channel == c %}selected{% endif %}>{{ c }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="form-row" style="flex: 1; min-width: 240px;">
+      <label for="search">Search</label>
+      <input
+        id="search"
+        class="search-input"
+        type="text"
+        name="search"
+        placeholder="Search by customer name or reservation ID"
+        value="{{ search or '' }}"
+      >
+    </div>
+
+    <button type="submit" class="filter-button">Apply Filters</button>
+  </form>
+
+  <table class="reservation-table">
+    <thead>
+      <tr>
+        <th>Reservation ID</th>
+        <th>Customer Name</th>
+        <th>Start Date</th>
+        <th>End Date</th>
+        <th>Check-out Date</th>
+        <th>Channel</th>
+        <th>Status</th>
+        <th>Room Numbers</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for r in reservations %}
+      <tr>
+        <td>{{ r["reservationID"] }}</td>
+        <td>{{ r["customerName"] or "N/A" }}</td>
+        <td>{{ r["startDate"] }}</td>
+        <td>{{ r["endDate"] }}</td>
+        <td>{{ r["checkOutDate"] or "N/A" }}</td>
+        <td>{{ r["channel"] }}</td>
+        <td>{{ r["status"] }}</td>
+        <td>{{ r["roomNumbers"] or "N/A" }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  {% if not reservations %}
+  <p class="no-results">No reservations found matching your criteria.</p>
+  {% endif %}
+</div>
+{% endblock %}

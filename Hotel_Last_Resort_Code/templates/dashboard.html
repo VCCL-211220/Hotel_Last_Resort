@@ -1,0 +1,199 @@
+{% extends 'base.html' %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Last Resort Hotel - Dashboard</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='dashboard.css') }}">
+</head>
+<body>
+  <header class="top-header">
+    <div class="brand-area">
+      <div class="brand-icon"></div>
+      <span class="brand-name">Last Resort Hotel</span>
+    </div>
+
+
+
+    <button class="btn employee-profile">Employee Profile</button>
+  </header>
+
+  <main class="dashboard">
+    <!-- Top metrics row -->
+    <section class="metrics-row">
+      <div class="metric-card">
+        <div class="metric-icon metric-circle"></div>
+        <div class="metric-text">
+          <p class="metric-label">Occupancy</p>
+          <p class="metric-value">{{ occupancy_percent }}%</p>
+        </div>
+      </div>
+
+      <div class="metric-card">
+        <div class="metric-icon metric-checkin"></div>
+        <div class="metric-text">
+          <p class="metric-label">Check-ins</p>
+          <p class="metric-value">{{ checkins_today|length }}</p>
+        </div>
+      </div>
+
+      <div class="metric-card">
+        <div class="metric-icon metric-checkout"></div>
+        <div class="metric-text">
+          <p class="metric-label">Check-outs</p>
+          <p class="metric-value">{{ checkouts_today|length }}</p>
+        </div>
+      </div>
+
+      <div class="metric-card">
+        <div class="metric-icon metric-maintenance"></div>
+        <div class="metric-text">
+          <p class="metric-label">Maintenance</p>
+          <p class="metric-value">{{ maintenance_rooms|length }}</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Rooms overview -->
+    <section class="rooms-overview-card">
+      <header class="section-header">
+        <h2>Rooms Overview</h2>
+        <span class="time-range">Today</span>
+      </header>
+
+      <div class="rooms-progress-bar">
+        <div class="progress available" style="width: {{ available_pct }}%;"></div>
+        <div class="progress reserved" style="width: {{ reserved_pct }}%;"></div>
+        <div class="progress out-of-service" style="width: {{ out_of_service_pct }}%;"></div>
+      </div>
+
+      <div class="rooms-legend">
+        <div class="legend-item">
+          <span class="legend-label">Available</span>
+          <span class="legend-value">{{ available_count }}</span>
+        </div>
+        <div class="legend-item">
+          <span class="legend-label">Reserved</span>
+          <span class="legend-value">{{ reserved_count }}</span>
+        </div>
+        <div class="legend-item">
+          <span class="legend-label">Out of Service</span>
+          <span class="legend-value">{{ out_of_service_count }}</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Bottom three-column row -->
+    <section class="bottom-row">
+      <!-- Today's Check-Ins -->
+      <div class="panel panel-checkins">
+        <h3>Today's Check-Ins</h3>
+        <ul class="list">
+          {% if checkins_today %}
+            {% for ci in checkins_today %}
+              <li class="list-row">
+                <span class="name">{{ ci["name"] }}</span>
+                <span class="time">{{ ci["startDate"] }}</span>
+              </li>
+            {% endfor %}
+          {% else %}
+            <li class="list-row">
+              <span class="name">No check-ins today</span>
+              <span class="time">—</span>
+            </li>
+          {% endif %}
+        </ul>
+      </div>
+
+      <!-- Today's Check-Outs -->
+      <div class="panel panel-checkouts">
+        <h3>Today's Check-Outs</h3>
+        <ul class="list">
+          {% if checkouts_today %}
+            {% for co in checkouts_today %}
+              <li class="list-row">
+                <span class="name">{{ co.name }}</span>
+                <span class="amount">${{ "%.2f"|format(co.amount) }}</span>
+              </li>
+            {% endfor %}
+          {% else %}
+            <li class="list-row">
+              <span class="name">No check-outs today</span>
+              <span class="amount">—</span>
+            </li>
+          {% endif %}
+        </ul>
+      </div>
+
+      <!-- Events Today -->
+      <div class="panel panel-events">
+        <h3>Events Today</h3>
+        {% if event_today %}
+          <div class="event-card">
+            <p class="event-title">Event</p>
+            <p class="event-org">{{ event_today["customer_name"] }}</p>
+            <p class="event-time-range">
+              {{ event_today["estimatedStartDate"] }} – {{ event_today["estimatedEndDate"] }}
+            </p>
+            <p class="event-start">
+              Attendance: {{ event_today["estimatedAttendance"] }}
+            </p>
+          </div>
+        {% else %}
+          <p>No events scheduled today.</p>
+        {% endif %}
+      </div>
+    </section>
+
+    <!-- Housekeeping & Maintenance and Actions -->
+    <section class="bottom-row secondary-row">
+      <div class="panel panel-housekeeping">
+        <h3>Housekeeping &amp; Maintenance</h3>
+
+        <div class="hk-list">
+          {% for room in cleaning_rooms %}
+            <div class="hk-room-row">
+              <span class="room-number">{{ room["roomNumber"] }}</span>
+              <span class="status-text">Cleaning in Progress</span>
+            </div>
+          {% endfor %}
+          {% for room in ready_rooms %}
+            <div class="hk-room-row">
+              <span class="room-number">{{ room["roomNumber"] }}</span>
+              <span class="status-text">Ready for Assignment</span>
+            </div>
+          {% endfor %}
+          {% for room in maintenance_rooms %}
+            <div class="hk-room-row">
+              <span class="room-number">{{ room["roomNumber"] }}</span>
+              <span class="status-text">Maintenance Requested</span>
+            </div>
+          {% endfor %}
+          {% if not cleaning_rooms and not ready_rooms and not maintenance_rooms %}
+            <div class="hk-room-row">
+              <span class="room-number">—</span>
+              <span class="status-text">No housekeeping tasks</span>
+            </div>
+          {% endif %}
+        </div>
+
+        <div class="hk-status-flags">
+          <div class="flag">
+            <span class="flag-icon"></span>
+            <span class="flag-text">Ready for Assignment</span>
+          </div>
+          <div class="flag">
+            <span class="flag-icon"></span>
+            <span class="flag-text">Maintenance Requested</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel panel-actions">
+        <button class="btn primary-btn">+ New Reservation</button>
+        <button class="btn secondary-btn">Assign Room</button>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

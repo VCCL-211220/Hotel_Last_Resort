@@ -1,0 +1,402 @@
+{# Modified by Abel: Created queries page template with 8 query displays #}
+{% extends "base.html" %}
+
+{% block title %}Queries – Last Resort Hotel{% endblock %}
+
+{% block head_extra %}
+<style>
+  .page-content {
+    background: #111;
+    min-height: 100vh;
+    padding: 40px 20px;
+  }
+
+  .queries-wrapper {
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  .queries-header {
+    font-size: 32px;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 32px;
+  }
+
+  .query-section {
+    background: #f5f5f7;
+    border-radius: 16px;
+    padding: 24px 32px;
+    margin-bottom: 32px;
+  }
+
+  .query-title {
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 16px;
+    color: #1d1d1f;
+  }
+
+  .query-description {
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 20px;
+  }
+
+  .query-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #fff;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .query-table thead {
+    background: #1d1d1f;
+    color: #fff;
+  }
+
+  .query-table th {
+    padding: 12px 16px;
+    text-align: left;
+    font-weight: 600;
+    font-size: 13px;
+    vertical-align: top;
+  }
+
+  .query-table th.number-cell {
+    text-align: right;
+  }
+
+  .query-table td {
+    padding: 12px 16px;
+    border-bottom: 1px solid #e5e5e7;
+    font-size: 13px;
+    text-align: left;
+    vertical-align: top;
+  }
+
+  .query-table tbody tr:hover {
+    background: #f9f9f9;
+  }
+
+  .query-table tbody tr:last-child td {
+    border-bottom: none;
+  }
+
+  .query-table .number-cell {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .query-table th.number-cell,
+  .query-table td.number-cell {
+    text-align: right;
+  }
+
+  .no-data {
+    text-align: center;
+    padding: 40px;
+    color: #666;
+    font-style: italic;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="queries-wrapper">
+  <h1 class="queries-header">Management Queries</h1>
+
+  <!-- Query 1: Revenue Trend Analysis -->
+  <div class="query-section">
+    <h2 class="query-title">Query 1: Revenue Trend Analysis by Month</h2>
+    <p class="query-description">Shows monthly revenue breakdown including room revenue and service revenue</p>
+    <table class="query-table">
+      <thead>
+        <tr>
+          <th>Month</th>
+          <th class="number-cell">Reservations</th>
+          <th class="number-cell">Room Revenue ($)</th>
+          <th class="number-cell">Service Revenue ($)</th>
+          <th class="number-cell">Total Revenue ($)</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% if query1_results %}
+        {% for row in query1_results %}
+        <tr>
+          <td>{{ row.month }}</td>
+          <td class="number-cell">{{ row.reservation_count }}</td>
+          <td class="number-cell">{{ "%.2f"|format(row.room_revenue or 0) }}</td>
+          <td class="number-cell">{{ "%.2f"|format(row.service_revenue or 0) }}</td>
+          <td class="number-cell">{{ "%.2f"|format(row.total_revenue or 0) }}</td>
+        </tr>
+        {% endfor %}
+        {% else %}
+        <tr>
+          <td colspan="5" class="no-data">No data available</td>
+        </tr>
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Query 2: Service Type Usage Analysis -->
+  <div class="query-section">
+    <h2 class="query-title">Query 2: Service Type Usage and Revenue Analysis</h2>
+    <p class="query-description">Analysis of hotel services usage frequency and revenue by service type (Restaurant,
+      Spa, Laundry, etc.)</p>
+    <table class="query-table">
+      <thead>
+        <tr>
+          <th>Service Type</th>
+          <th class="number-cell">Base Price ($)</th>
+          <th class="number-cell">Usage Count</th>
+          <th class="number-cell">Reservations Using</th>
+          <th class="number-cell">Unique Customers</th>
+          <th class="number-cell">Total Revenue ($)</th>
+          <th class="number-cell">Avg Amount ($)</th>
+          <th>First Used</th>
+          <th>Last Used</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% if query2_results %}
+        {% for row in query2_results %}
+        <tr>
+          <td>{{ row.service_type }}</td>
+          <td class="number-cell">{{ "%.2f"|format(row.base_price or 0) }}</td>
+          <td class="number-cell">{{ row.usage_count }}</td>
+          <td class="number-cell">{{ row.reservations_using_service }}</td>
+          <td class="number-cell">{{ row.unique_customers }}</td>
+          <td class="number-cell">{{ "%.2f"|format(row.total_revenue or 0) }}</td>
+          <td class="number-cell">{{ "%.2f"|format(row.avg_amount_per_use or 0) }}</td>
+          <td>{{ row.first_used_date or 'N/A' }}</td>
+          <td>{{ row.last_used_date or 'N/A' }}</td>
+        </tr>
+        {% endfor %}
+        {% else %}
+        <tr>
+          <td colspan="9" class="no-data">No data available</td>
+        </tr>
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Query 3: Top Revenue Customers -->
+  <div class="query-section">
+    <h2 class="query-title">Query 3: Top Revenue Customers</h2>
+    <p class="query-description">Customers ranked by total revenue generated (room + services)</p>
+    <table class="query-table">
+      <thead>
+        <tr>
+          <th>Customer ID</th>
+          <th>Customer Name</th>
+          <th class="number-cell">Reservations</th>
+          <th class="number-cell">Room Revenue ($)</th>
+          <th class="number-cell">Service Revenue ($)</th>
+          <th class="number-cell">Total Revenue ($)</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% if query3_results %}
+        {% for row in query3_results %}
+        <tr>
+          <td>{{ row.customerID }}</td>
+          <td>{{ row.name }}</td>
+          <td class="number-cell">{{ row.reservation_count }}</td>
+          <td class="number-cell">{{ "%.2f"|format(row.room_revenue or 0) }}</td>
+          <td class="number-cell">{{ "%.2f"|format(row.service_revenue or 0) }}</td>
+          <td class="number-cell">{{ "%.2f"|format(row.total_revenue or 0) }}</td>
+        </tr>
+        {% endfor %}
+        {% else %}
+        <tr>
+          <td colspan="6" class="no-data">No data available</td>
+        </tr>
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Query 4: Booking Channel Analysis -->
+  <div class="query-section">
+    <h2 class="query-title">Query 4: Booking Channel Analysis</h2>
+    <p class="query-description">Performance analysis by booking channel (Online, Phone, Email, Travel Agent)</p>
+    <table class="query-table">
+      <thead>
+        <tr>
+          <th>Channel</th>
+          <th class="number-cell">Reservations</th>
+          <th class="number-cell">Unique Customers</th>
+          <th class="number-cell">Total Revenue ($)</th>
+          <th class="number-cell">Avg Stay (Days)</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% if query4_results %}
+        {% for row in query4_results %}
+        <tr>
+          <td>{{ row.channel or 'N/A' }}</td>
+          <td class="number-cell">{{ row.reservation_count }}</td>
+          <td class="number-cell">{{ row.unique_customers }}</td>
+          <td class="number-cell">{{ "%.2f"|format(row.total_revenue or 0) }}</td>
+          <td class="number-cell">{{ "%.2f"|format(row.avg_stay_days or 0) }}</td>
+        </tr>
+        {% endfor %}
+        {% else %}
+        <tr>
+          <td colspan="5" class="no-data">No data available</td>
+        </tr>
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Query 5: Room Type Popularity -->
+  <div class="query-section">
+    <h2 class="query-title">Query 5: Room Type Popularity</h2>
+    <p class="query-description">Analysis of room types by booking frequency and revenue</p>
+    <table class="query-table">
+      <thead>
+        <tr>
+          <th>Room Type</th>
+          <th class="number-cell">Base Price ($)</th>
+          <th class="number-cell">Bookings</th>
+          <th class="number-cell">Unique Customers</th>
+          <th class="number-cell">Avg Stay (Days)</th>
+          <th class="number-cell">Total Revenue ($)</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% if query5_results %}
+        {% for row in query5_results %}
+        <tr>
+          <td>{{ row.room_type }}</td>
+          <td class="number-cell">{{ "%.2f"|format(row.base_price or 0) }}</td>
+          <td class="number-cell">{{ row.booking_count }}</td>
+          <td class="number-cell">{{ row.unique_customers }}</td>
+          <td class="number-cell">{{ "%.2f"|format(row.avg_stay_days or 0) }}</td>
+          <td class="number-cell">{{ "%.2f"|format(row.total_revenue or 0) }}</td>
+        </tr>
+        {% endfor %}
+        {% else %}
+        <tr>
+          <td colspan="6" class="no-data">No data available</td>
+        </tr>
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Query 6: Customer Booking Frequency -->
+  <div class="query-section">
+    <h2 class="query-title">Query 6: Customer Booking Frequency</h2>
+    <p class="query-description">Analysis of customer loyalty and booking patterns</p>
+    <table class="query-table">
+      <thead>
+        <tr>
+          <th>Customer ID</th>
+          <th>Customer Name</th>
+          <th class="number-cell">Total Reservations</th>
+          <th>First Booking</th>
+          <th>Last Booking</th>
+          <th class="number-cell">Avg Stay (Days)</th>
+          <th class="number-cell">Completed</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% if query6_results %}
+        {% for row in query6_results %}
+        <tr>
+          <td>{{ row.customerID }}</td>
+          <td>{{ row.name }}</td>
+          <td class="number-cell">{{ row.total_reservations }}</td>
+          <td>{{ row.first_booking or 'N/A' }}</td>
+          <td>{{ row.last_booking or 'N/A' }}</td>
+          <td class="number-cell">{{ "%.2f"|format(row.avg_stay_days or 0) }}</td>
+          <td class="number-cell">{{ row.completed_reservations }}</td>
+        </tr>
+        {% endfor %}
+        {% else %}
+        <tr>
+          <td colspan="7" class="no-data">No data available</td>
+        </tr>
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Query 7: Average Stay Duration by Room Type -->
+  <div class="query-section">
+    <h2 class="query-title">Query 7: Average Stay Duration by Room Type</h2>
+    <p class="query-description">Statistical analysis of stay duration for each room type</p>
+    <table class="query-table">
+      <thead>
+        <tr>
+          <th>Room Type</th>
+          <th class="number-cell">Reservations</th>
+          <th class="number-cell">Avg Stay (Days)</th>
+          <th class="number-cell">Min Stay (Days)</th>
+          <th class="number-cell">Max Stay (Days)</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% if query7_results %}
+        {% for row in query7_results %}
+        <tr>
+          <td>{{ row.room_type }}</td>
+          <td class="number-cell">{{ row.reservation_count }}</td>
+          <td class="number-cell">{{ "%.2f"|format(row.avg_stay_days or 0) }}</td>
+          <td class="number-cell">{{ "%.0f"|format(row.min_stay_days or 0) }}</td>
+          <td class="number-cell">{{ "%.0f"|format(row.max_stay_days or 0) }}</td>
+        </tr>
+        {% endfor %}
+        {% else %}
+        <tr>
+          <td colspan="5" class="no-data">No data available</td>
+        </tr>
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Query 8: Monthly Revenue Comparison -->
+  <div class="query-section">
+    <h2 class="query-title">Query 8: Monthly Revenue Comparison with Service Breakdown</h2>
+    <p class="query-description">Comprehensive monthly revenue analysis including service type diversity</p>
+    <table class="query-table">
+      <thead>
+        <tr>
+          <th>Month</th>
+          <th class="number-cell">Reservations</th>
+          <th class="number-cell">Room Revenue ($)</th>
+          <th class="number-cell">Service Revenue ($)</th>
+          <th class="number-cell">Service Types Used</th>
+          <th class="number-cell">Total Revenue ($)</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% if query8_results %}
+        {% for row in query8_results %}
+        <tr>
+          <td>{{ row.month }}</td>
+          <td class="number-cell">{{ row.reservation_count }}</td>
+          <td class="number-cell">{{ "%.2f"|format(row.room_revenue or 0) }}</td>
+          <td class="number-cell">{{ "%.2f"|format(row.service_revenue or 0) }}</td>
+          <td class="number-cell">{{ row.service_types_used or 0 }}</td>
+          <td class="number-cell">{{ "%.2f"|format(row.total_revenue or 0) }}</td>
+        </tr>
+        {% endfor %}
+        {% else %}
+        <tr>
+          <td colspan="6" class="no-data">No data available</td>
+        </tr>
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
+
+</div>
+{% endblock %}

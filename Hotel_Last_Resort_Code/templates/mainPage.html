@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Last Resort Hotel</title>
+  <link rel="stylesheet" href="main.css">
+</head>
+
+<body>
+
+  <!-- HEADER WITH LOGO + NAV LINKS -->
+  <header>
+    <div class="header-left">
+      <img src="logo.png" alt="Logo" class="logo" />
+      <a href="/" class="site-name">Last Resort Hotel</a>
+    </div>
+
+    <nav>
+      <a href="login.html">Employee Login</a>
+      <a href="details.html">Customer Login</a>
+    </nav>
+  </header>
+
+  <!-- MAIN CONTENT -->
+  <div class="content">
+
+    <!-- ANNOUNCEMENT BAR -->
+    <div class="announcement">
+      <span>Announcement: New sites are opening in North America!</span>
+      <a href="https://figma.com/sites" target="_blank">Details here</a>
+    </div>
+
+    <!-- HEADER TEXT -->
+    <div class="header-content">
+      <h1>Last Resort Hotel</h1>
+
+      <img src="{{ url_for('static', filename='images/mainPageImage.png') }}" alt="Hotel Image" class="header-image">
+
+      <a class="join-btn" href="join.html">Join us</a>
+    </div>
+
+  </div>
+
+</body>
+
+<footer class="site-footer">
+  <p class="footer-title">Last Resort Hotel</p>
+  <p>&copy; 2025</p>
+
+  <div class="footer-links">
+    <a href="#">Contact Us</a>
+    <a href="#">Destinations</a>
+  </div>
+
+  <div class="footer-icons">
+    <a href="#">Follow us on</a>
+    <a href="#"><img src="{{ url_for('static', filename='images/insta.png') }}" alt="instagram-image" class="footer-icon"></a>
+    <a href="#"><img src="{{ url_for('static', filename='images/tiktok.png') }}" alt="tiktok-image" class="footer-icon"></a>
+  </div>
+</footer>
+
+
+
+
+
+</html>
+

@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>{% block title %}Last Resort Hotel{% endblock %}</title>
+
+  <!-- Global CSS -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+
+  {% block head_extra %}{% endblock %}
+</head>
+<body>
+  <header class="top-header">
+    <div class="brand-area">
+      <div class="brand-icon"></div>
+      <span class="brand-name">Last Resort Hotel</span>
+    </div>
+
+    <nav class="main-nav">
+      <!-- Home / Landing / Dashboard -->
+      <a href="{{ url_for('home') }}"
+         class="nav-item {% if request.endpoint in ['home', 'dashboard'] %}active{% endif %}">
+        Dashboard
+      </a>
+
+      <!-- Reservations page -->
+      <a href="{{ url_for('reservation') }}"
+         class="nav-item {% if request.endpoint == 'reservation' %}active{% endif %}">
+        Reservations
+      </a>
+
+      <!-- Rooms status page -->
+      <a href="{{ url_for('rooms_status') }}"
+         class="nav-item {% if request.endpoint == 'rooms_status' %}active{% endif %}">
+        Rooms
+      </a>
+
+      <!-- Guests page -->
+      <a href="{{ url_for('guests') }}"
+         class="nav-item {% if request.endpoint == 'guests' %}active{% endif %}">
+        Guests
+      </a>
+
+      <!-- Events page -->
+      <a href="{{ url_for('events') }}"
+         class="nav-item {% if request.endpoint == 'events' %}active{% endif %}">
+        Events
+      </a>
+
+      <!-- Billing page -->
+      <a href="{{ url_for('billing') }}"
+         class="nav-item {% if request.endpoint == 'billing' %}active{% endif %}">
+        Billing
+      </a>
+
+      <!-- Queries page -->
+      <a href="{{ url_for('queries') }}"
+         class="nav-item {% if request.endpoint == 'queries' %}active{% endif %}">
+        Queries
+      </a>
+    </nav>
+
+    <!-- Employee profile button on the right -->
+    <button
+      class="btn employee-profile"
+      type="button"
+      onclick="window.location.href='{{ url_for('employee_profile') }}';">
+      Employee Profile
+    </button>
+  </header>
+
+  <!-- Main page content -->
+  <main class="page-content">
+    {% block content %}
+    {% endblock %}
+  </main>
+</body>
+</html>

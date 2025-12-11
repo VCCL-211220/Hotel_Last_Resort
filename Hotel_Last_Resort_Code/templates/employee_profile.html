@@ -1,0 +1,250 @@
+{# templates/employee_profile.html #}
+{% extends "base.html" %}
+
+{% block title %}Employee Profile – Last Resort Hotel{% endblock %}
+
+{% block head_extra %}
+<style>
+  .page-content {
+    background: #111;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 40px 0;
+  }
+
+  .employee-shell {
+    background: #e6e7ea;
+    border-radius: 18px;
+    padding: 28px 32px 36px;
+    max-width: 1100px;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .employee-layout {
+    display: grid;
+    grid-template-columns: 280px minmax(0, 1fr);
+    gap: 24px;
+  }
+
+  /* left card */
+  .emp-card {
+    background: #fff;
+    border-radius: 18px;
+    padding: 22px 24px 26px;
+  }
+
+  .emp-name {
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+
+  .emp-subline {
+    font-size: 13px;
+    color: #555;
+    margin-bottom: 2px;
+  }
+
+  .emp-meta {
+    margin-top: 14px;
+    font-size: 13px;
+    line-height: 1.5;
+  }
+
+  .emp-meta span {
+    font-weight: 600;
+  }
+
+  .emp-badge-row {
+    margin-top: 16px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .emp-badge {
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: #111;
+    color: #fff;
+    font-size: 11px;
+  }
+
+  .emp-stat-block {
+    margin-top: 16px;
+    padding-top: 12px;
+    border-top: 1px solid #eee;
+    font-size: 13px;
+  }
+
+  .emp-stat-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 4px;
+  }
+
+  /* right column */
+
+  .emp-right {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+
+  .emp-section-card {
+    background: #fff;
+    border-radius: 18px;
+    padding: 18px 22px 22px;
+  }
+
+  .emp-section-title {
+    font-size: 17px;
+    font-weight: 600;
+    margin-bottom: 10px;
+  }
+
+  .emp-role-list {
+    font-size: 13px;
+    line-height: 1.6;
+  }
+
+  .emp-role-item {
+    margin-bottom: 8px;
+  }
+
+  .emp-role-type {
+    font-weight: 600;
+  }
+
+  .emp-role-desc {
+    color: #666;
+  }
+
+  .emp-activity-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+
+  .emp-activity-table th,
+  .emp-activity-table td {
+    text-align: left;
+    padding: 6px 4px;
+    border-bottom: 1px solid #f0f0f0;
+  }
+
+  .emp-activity-table th {
+    font-weight: 600;
+    color: #666;
+  }
+
+  .emp-empty {
+    font-size: 13px;
+    color: #777;
+  }
+
+  @media (max-width: 900px) {
+    .employee-layout {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="employee-shell">
+  {% if not staff %}
+    <p>No staff found in the database.</p>
+  {% else %}
+  <div class="employee-layout">
+
+    <!-- LEFT: profile card -->
+    <aside class="emp-card">
+      <div class="emp-name">{{ staff["name"] }}</div>
+      <div class="emp-subline">{{ staff["department"] }}</div>
+      <div class="emp-subline">Staff ID: {{ staff["staffID"] }}</div>
+
+      <div class="emp-meta">
+        <div><span>Gender:</span> {{ staff["gender"] or "—" }}</div>
+        <div><span>Hire Date:</span> {{ staff["hireDate"] }}</div>
+        <div><span>Phone:</span> {{ staff["phone"] }}</div>
+      </div>
+
+      <div class="emp-badge-row">
+        {% if roles %}
+          {% for r in roles %}
+            <div class="emp-badge">{{ r["roleType"] }}</div>
+          {% endfor %}
+        {% else %}
+          <div class="emp-badge">No Roles Assigned</div>
+        {% endif %}
+      </div>
+
+      <div class="emp-stat-block">
+        <div class="emp-stat-row">
+          <span>Total Reservations Assigned</span>
+          <span>{{ total_reservations }}</span>
+        </div>
+        <div class="emp-stat-row">
+          <span>Logged Actions</span>
+          <span>{{ total_actions }}</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- RIGHT: roles + activity -->
+    <section class="emp-right">
+
+      <div class="emp-section-card">
+        <div class="emp-section-title">Roles & Responsibilities</div>
+        {% if roles %}
+          <div class="emp-role-list">
+            {% for r in roles %}
+              <div class="emp-role-item">
+                <span class="emp-role-type">{{ r["roleType"] }}</span>
+                <span class="emp-role-desc"> – {{ r["description"] }}</span>
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <p class="emp-empty">This employee has no roles assigned yet.</p>
+        {% endif %}
+      </div>
+
+      <div class="emp-section-card">
+        <div class="emp-section-title">Recent Activity</div>
+        {% if activity %}
+          <table class="emp-activity-table">
+            <thead>
+              <tr>
+                <th>Time</th>
+                <th>Action</th>
+                <th>Reservation</th>
+                <th>Guest</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for a in activity %}
+              <tr>
+                <td>{{ a["time"] }}</td>
+                <td>{{ a["action"] }}</td>
+                <td>{{ a["reservationID"] or "—" }}</td>
+                <td>{{ a["customer_name"] or "—" }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        {% else %}
+          <p class="emp-empty">No recent activity logged for this employee.</p>
+        {% endif %}
+      </div>
+
+    </section>
+
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

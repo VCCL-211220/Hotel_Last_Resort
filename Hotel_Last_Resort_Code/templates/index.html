@@ -1,0 +1,188 @@
+{# templates/index.html #}
+{% extends "base.html" %}
+
+{% block title %}Last Resort Hotel – Welcome{% endblock %}
+
+{% block head_extra %}
+<style>
+  .page-content {
+    background: #222;   /* dark canvas behind the white card */
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: stretch;
+    padding: 40px 0;
+  }
+
+  .home-wrapper {
+    background: #ffffff;
+    border-radius: 0;
+    max-width: 1200px;
+    width: 100%;
+    margin: 0 24px;
+    padding: 48px 56px 60px;
+    box-sizing: border-box;
+  }
+
+  /* top-right sign-in buttons row */
+  .home-top-row {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-bottom: 40px;
+  }
+
+  .home-btn {
+    border-radius: 999px;
+    padding: 8px 18px;
+    font-size: 13px;
+    cursor: pointer;
+    border: 1px solid #000;
+    background: transparent;
+  }
+  .home-btn--employee {
+    background: #ffffff;
+    color: #000;
+  }
+  .home-btn--customer {
+    background: #000000;
+    color: #ffffff;
+  }
+
+  /* sections */
+  .home-section {
+    display: grid;
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+    gap: 40px;
+    align-items: center;
+    margin-bottom: 64px;
+  }
+
+  .home-heading {
+    font-size: 32px;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+
+  .home-subtext {
+    font-size: 14px;
+    color: #555;
+    margin-bottom: 24px;
+  }
+
+  .home-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 22px;
+    border-radius: 999px;
+    background: #000;
+    color: #fff;
+    font-size: 14px;
+    border: none;
+    cursor: pointer;
+  }
+
+  .home-cta--outline {
+    background: #000;
+    color: #fff;
+  }
+
+  .home-cta-arrow {
+    font-size: 14px;
+  }
+
+  .hero-image-card {
+    border-radius: 18px;
+    overflow: hidden;
+    width: 100%;
+    aspect-ratio: 4 / 3;
+  }
+
+  .hero-image-card img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .map-card {
+    border-radius: 18px;
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+  }
+
+  .map-card iframe {
+    width: 100%;
+    height: 100%;
+    border: 0;
+  }
+
+  .location-text {
+    font-size: 14px;
+    color: #555;
+    margin-top: 10px;
+    line-height: 1.5;
+  }
+
+  @media (max-width: 900px) {
+    .home-section {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="home-wrapper">
+
+  <!-- top right sign-in buttons -->
+  <div class="home-top-row">
+    <button class="home-btn home-btn--employee">Employee Sign In</button>
+    <button class="home-btn home-btn--customer">Customer Sign In</button>
+  </div>
+
+  <!-- Hero section: A Global Celebration -->
+  <section class="home-section">
+    <div>
+      <h1 class="home-heading">A Global Celebration</h1>
+      <p class="home-subtext">Find your soul place.</p>
+      <button class="home-cta">Sign Up for NewsLetter</button>
+    </div>
+
+    <div class="hero-image-card">
+      <!-- put your hero photo in static/images/hero-pool.jpg -->
+      <img src="{{ url_for('static', filename='images/beach.png') }}"
+           alt="Resort pool overlooking the ocean">
+    </div>
+  </section>
+
+  <!-- Find a Hotel Near You -->
+  <section class="home-section">
+    <div>
+      <h2 class="home-heading">Find a Hotel Near You</h2>
+
+      <div class="location-text">
+        <p>The Location</p>
+        <p>1234 Garden Boulevard</p>
+        <p>City, ZZ 98765</p>
+      </div>
+
+      <button class="home-cta home-cta--outline">
+        Call to action <span class="home-cta-arrow">→</span>
+      </button>
+    </div>
+
+    <div class="map-card">
+      <iframe
+        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d6635.4315146668205!2d-116.40711879999999!3d33.7421655!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x80dafdc008082fc7%3A0xb089959fc0722e4f!2sOmni%20Rancho%20Las%20Palmas%20Resort%20%26%20Spa!5e0!3m2!1sen!2sus!4v1765439438151!5m2!1sen!2sus"
+        loading="lazy"
+        allowfullscreen=""
+        referrerpolicy="no-referrer-when-downgrade">
+      </iframe>
+    </div>
+  </section>
+
+</div>
+{% endblock %}

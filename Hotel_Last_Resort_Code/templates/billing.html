@@ -1,0 +1,384 @@
+{# templates/billing.html #}
+{% extends "base.html" %}
+
+{% block title %}Billing – Last Resort Hotel{% endblock %}
+
+{% block head_extra %}
+<style>
+  .page-content {
+    background: #111;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 36px 0;
+  }
+
+  .billing-wrapper {
+    max-width: 1200px;
+    width: 100%;
+    margin: 0 24px;
+    background: #e8e8eb;
+    border-radius: 16px;
+    padding: 20px 24px 28px;
+    box-sizing: border-box;
+  }
+
+  .billing-layout {
+    display: grid;
+    grid-template-columns: 280px minmax(0, 1fr);
+    gap: 20px;
+  }
+
+  /* LEFT: invoice summary */
+  .invoice-card {
+    background: #ffffff;
+    border-radius: 14px;
+    padding: 16px 18px 18px;
+    box-shadow: 0 0 0 1px rgba(0,0,0,0.03);
+  }
+
+  .invoice-title {
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 10px;
+  }
+
+  .invoice-status-pill {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 500;
+    border: 1px solid #ccc;
+    margin-bottom: 12px;
+    background: #f5f5f5;
+  }
+
+  .invoice-lines {
+    font-size: 13px;
+    line-height: 1.5;
+    margin-bottom: 10px;
+  }
+
+  .invoice-lines div + div {
+    margin-top: 2px;
+  }
+
+  .invoice-label {
+    color: #555;
+  }
+
+  .invoice-bold {
+    font-weight: 600;
+  }
+
+  .invoice-summary-row {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 4px;
+    font-size: 13px;
+  }
+
+  .invoice-summary-row.total-main {
+    margin-top: 10px;
+    padding-top: 8px;
+    border-top: 1px solid #e0e0e0;
+    font-weight: 600;
+  }
+
+  .invoice-summary-row.small {
+    font-size: 12px;
+  }
+
+  .invoice-btn {
+    width: 100%;
+    padding: 9px 12px;
+    border-radius: 999px;
+    border: 1px solid #000;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    margin-top: 12px;
+  }
+
+  .invoice-btn--primary {
+    background: #000;
+    color: #fff;
+  }
+
+  .invoice-btn--secondary {
+    background: #fff;
+    color: #000;
+  }
+
+  .invoice-footer {
+    margin-top: 16px;
+    font-size: 11px;
+    color: #666;
+    line-height: 1.4;
+  }
+
+  /* RIGHT: charges + actions */
+  .billing-main {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .billing-search {
+    background: #ffffff;
+    border-radius: 999px;
+    padding: 8px 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+  }
+
+  .billing-search input {
+    border: none;
+    outline: none;
+    font-size: 13px;
+    width: 100%;
+  }
+
+  .billing-search-icon {
+    font-size: 14px;
+  }
+
+  .charges-card {
+    background: #ffffff;
+    border-radius: 14px;
+    padding: 12px 14px 14px;
+  }
+
+  .charges-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+  }
+
+  .charges-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: #555;
+  }
+
+  .charges-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+
+  .charges-table th,
+  .charges-table td {
+    padding: 8px 6px;
+    text-align: left;
+    border-bottom: 1px solid #eee;
+  }
+
+  .charges-table th {
+    font-size: 12px;
+    color: #777;
+    font-weight: 600;
+  }
+
+  .charges-table tr:last-child td {
+    border-bottom: none;
+  }
+
+  .charges-description {
+    font-weight: 600;
+  }
+
+  .charges-subtext {
+    font-size: 11px;
+    color: #777;
+  }
+
+  .billing-actions {
+    margin-top: 8px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .billing-btn {
+    padding: 7px 14px;
+    border-radius: 999px;
+    border: 1px solid #ccc;
+    background: #f8f8f8;
+    font-size: 12px;
+    cursor: pointer;
+  }
+
+  .billing-btn--primary {
+    border-color: #000;
+    background: #000;
+    color: #fff;
+  }
+
+  .more-menu {
+    margin-left: auto;
+    font-size: 18px;
+    cursor: pointer;
+  }
+
+  .no-charges {
+    font-size: 12px;
+    color: #777;
+    text-align: center;
+    padding: 12px 0;
+  }
+
+  @media (max-width: 960px) {
+    .billing-layout {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="billing-wrapper">
+
+  <div class="billing-layout">
+
+    <!-- LEFT: Invoice Summary -->
+    <aside class="invoice-card">
+      <h2 class="invoice-title">Invoice Summary</h2>
+
+      <div class="invoice-status-pill">
+        {{ invoice.status|capitalize if invoice and invoice.status else "Open" }}
+      </div>
+
+      <div class="invoice-lines">
+        <div><span class="invoice-label">Guest:</span>
+          <span class="invoice-bold">
+            {{ invoice.guest_name if invoice and invoice.guest_name else "John Smith" }}
+          </span>
+        </div>
+        <div><span class="invoice-label">Room:</span>
+          <span>
+            {{ invoice.room_number if invoice and invoice.room_number else "504" }}
+          </span>
+          &nbsp;&nbsp;
+          <span class="invoice-label">Resv ID:</span>
+          <span>
+            {{ invoice.reservation_id if invoice and invoice.reservation_id else "1023" }}
+          </span>
+        </div>
+      </div>
+
+      <div class="invoice-summary-row total-main">
+        <span>Total Due</span>
+        <span>${{ "%.2f"|format(invoice.total_due) if invoice and invoice.total_due is not none else "297.50" }}</span>
+      </div>
+
+      <div class="invoice-summary-row small">
+        <span>Room Charges</span>
+        <span>${{ "%.2f"|format(invoice.room_charges) if invoice and invoice.room_charges is not none else "200.00" }}</span>
+      </div>
+      <div class="invoice-summary-row small">
+        <span>Services</span>
+        <span>${{ "%.2f"|format(invoice.service_charges) if invoice and invoice.service_charges is not none else "40.00" }}</span>
+      </div>
+      <div class="invoice-summary-row small">
+        <span>Taxes</span>
+        <span>${{ "%.2f"|format(invoice.taxes) if invoice and invoice.taxes is not none else "-22.50" }}</span>
+      </div>
+
+      <div class="invoice-summary-row total-main">
+        <span>Total Due</span>
+        <span>${{ "%.2f"|format(invoice.total_due) if invoice and invoice.total_due is not none else "297.50" }}</span>
+      </div>
+
+      <button class="invoice-btn invoice-btn--primary">Close Bill</button>
+      <button class="invoice-btn invoice-btn--secondary">Print / Export PDF</button>
+
+      <div class="invoice-footer">
+        <div>
+          Last updated by
+          {{ invoice.updated_by if invoice and invoice.updated_by else "Emily Johnson" }}
+          at
+          {{ invoice.updated_time if invoice and invoice.updated_time else "8:40 PM" }}
+        </div>
+        <div>
+          Payment method:
+          {{ invoice.payment_method if invoice and invoice.payment_method else "Card ending •4521" }}
+        </div>
+      </div>
+    </aside>
+
+    <!-- RIGHT: Charges -->
+    <section class="billing-main">
+
+      <!-- Search bar -->
+      <div class="billing-search">
+        <span class="billing-search-icon">🔍</span>
+        <input
+          type="text"
+          name="search"
+          placeholder="Search by guest, room, or invoice #"
+          value="{{ search or '' }}"
+        >
+      </div>
+
+      <!-- Charges table + actions -->
+      <div class="charges-card">
+        <div class="charges-header-row">
+          <div class="charges-title">Invoice Summary</div>
+        </div>
+
+        <table class="charges-table">
+          <thead>
+          <tr>
+            <th>Charge</th>
+            <th>Category</th>
+            <th>Qty</th>
+            <th>Unit Price</th>
+            <th>Amount</th>
+            <th>Date</th>
+          </tr>
+          </thead>
+          <tbody>
+          {% if line_items and line_items|length %}
+            {% for item in line_items %}
+              <tr>
+                <td>
+                  <div class="charges-description">{{ item.description }}</div>
+                  {% if item.note %}
+                    <div class="charges-subtext">{{ item.note }}</div>
+                  {% endif %}
+                </td>
+                <td>{{ item.category }}</td>
+                <td>{{ item.qty }}</td>
+                <td>${{ "%.2f"|format(item.unit_price) }}</td>
+                <td>${{ "%.2f"|format(item.amount) }}</td>
+                <td>{{ item.date }}</td>
+              </tr>
+            {% endfor %}
+          {% else %}
+            <tr>
+              <td colspan="6" class="no-charges">No charges on this invoice yet.</td>
+            </tr>
+          {% endif %}
+          </tbody>
+        </table>
+
+        <div class="billing-actions">
+          <button class="billing-btn billing-btn--primary">+ Add Charge</button>
+          <button class="billing-btn">Apply Discount</button>
+          <button class="billing-btn">Add Tax / Fee</button>
+          <span class="more-menu">⋯</span>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+</div>
+{% endblock %}
